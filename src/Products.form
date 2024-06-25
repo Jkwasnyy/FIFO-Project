@@ -141,12 +141,12 @@
               <text value="ADD"/>
             </properties>
           </component>
-          <component id="e8916" class="javax.swing.JButton" binding="NEWButton" default-binding="true">
+          <component id="e8916" class="javax.swing.JButton" binding="EXPORTButton" default-binding="true">
             <constraints>
               <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text value="NEW"/>
+              <text value="EXPORT"/>
             </properties>
           </component>
           <component id="cc47" class="javax.swing.JButton" binding="UPDATEButton" default-binding="true">

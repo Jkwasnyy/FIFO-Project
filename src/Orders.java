@@ -2,38 +2,37 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.*;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.io.*;
-import java.io.FileFilter;
 
-public class Products extends JFrame{
+public class Orders extends JFrame{
     private JPanel panel1;
-    private JTextField textPrice;
-    private JTextField textQty;
-    private JTextField textUseBefore;
-    private JTextField textName;
+    private JTextField textCustomer;
+    private JTextField textProduct;
+    private JTextField textOrderName;
+    private JTextField textDate;
     private JComboBox comboBox1;
     private JButton searchButton;
     private JButton ADDButton;
     private JButton EXPORTButton;
-    private JButton UPDATEButton;
     private JButton DELETEButton;
     private JTable table1;
     private int width = 500, height = 400;
 
-    public Products(){
-        super("Products");
+    public Orders() {
+        super("Orders");
         this.setContentPane(this.panel1);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setSize(width,height);
+        this.setSize(width, height);
         this.setLocationRelativeTo(null);
         this.setVisible(true);
         Connect();
         InitializeTable();
-        LoadProductNo();
+        LoadOrderNo();
         Fetch();
 
         ADDButton.addActionListener(new ActionListener() {
@@ -41,27 +40,25 @@ public class Products extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 try {
 
-                    String product_name = textName.getText();
-                    String price = textPrice.getText();
-                    String qty = textQty.getText();
-                    String usage_date = textUseBefore.getText();
+                    String id_customer = textCustomer.getText();
+                    String id_product = textProduct.getText();
+                    String order_name = textOrderName.getText();
 
-                    pst = connection.prepareStatement("INSERT INTO products_tbl (product_name,price,qty,usage_date) VALUES (?,?,?,?)");
-                    pst.setString(1,product_name);
-                    pst.setString(2,price);
-                    pst.setString(3,qty);
-                    pst.setString(4,usage_date);
+                    pst = connection.prepareStatement("INSERT INTO orders_tbl (id_customer,id_product,order_name) VALUES (?,?,?)");
+                    pst.setString(1,id_customer);
+                    pst.setString(2,id_product);
+                    pst.setString(3,order_name);
 
                     int k = pst.executeUpdate();
 
                     if(k == 1){
                         JOptionPane.showMessageDialog(null,"Record Added!");
-                        textName.setText("");
-                        textPrice.setText("");
-                        textQty.setText("");
-                        textUseBefore.setText("");
+                        textCustomer.setText("");
+                        textProduct.setText("");
+                        textOrderName.setText("");
+                        textDate.setText("");
                         Fetch();
-                        LoadProductNo();
+                        LoadOrderNo();
                     }
                     else{
                         JOptionPane.showMessageDialog(null,"Record failed to saved!");
@@ -77,14 +74,14 @@ public class Products extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 String pid = comboBox1.getSelectedItem().toString();
                 try {
-                    pst = connection.prepareStatement("SELECT * FROM products_tbl WHERE id=?");
+                    pst = connection.prepareStatement("SELECT * FROM orders_tbl WHERE order_id=?");
                     pst.setString(1,pid);
                     rs=pst.executeQuery();
                     if(rs.next() == true){
-                        textName.setText(rs.getString(2));
-                        textPrice.setText(rs.getString(3));
-                        textQty.setText(rs.getString(4));
-                        textUseBefore.setText(rs.getString(5));
+                        textCustomer.setText(rs.getString(2));
+                        textProduct.setText(rs.getString(3));
+                        textDate.setText(rs.getString(4));
+                        textOrderName.setText(rs.getString(5));
                     }
                     else{
                         JOptionPane.showMessageDialog(null,"No record found!");
@@ -95,56 +92,20 @@ public class Products extends JFrame{
             }
         });
 
-        UPDATEButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String pname = textName.getText();
-                String price = textPrice.getText();
-                String qty = textQty.getText();
-                String date = textUseBefore.getText();
-                String pid = comboBox1.getSelectedItem().toString();
-
-                try {
-                    pst = connection.prepareStatement("UPDATE products_tbl SET product_name=?,price=?,qty=?,usage_date=? WHERE id=?");
-                    pst.setString(1,pname);
-                    pst.setString(2,price);
-                    pst.setString(3,qty);
-                    pst.setString(4,date);
-                    pst.setString(5,pid);
-                    int k = pst.executeUpdate();
-                    if(k == 1){
-                        JOptionPane.showMessageDialog(null,"Record has been succesfully updated!");
-                        textName.setText("");
-                        textPrice.setText("");
-                        textQty.setText("");
-                        textUseBefore.setText("");
-                        textName.requestFocus();
-                        LoadProductNo();
-                        Fetch();
-                    }
-
-                } catch (SQLException ex) {
-                    Logger.getLogger(Products.class.getName()).log(Level.SEVERE,null,ex);
-                }
-            }
-        });
-
         DELETEButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String pid = comboBox1.getSelectedItem().toString();
                 try {
-                    pst = connection.prepareStatement("DELETE FROM products_tbl WHERE id=?");
-                    pst.setString(1,pid);
+                    pst = connection.prepareStatement("DELETE FROM orders_tbl ORDER BY order_date ASC LIMIT 1");
                     int k = pst.executeUpdate();
                     if(k == 1){
                         JOptionPane.showMessageDialog(null,"Record has been succesfully deleted!");
-                        textName.setText("");
-                        textPrice.setText("");
-                        textQty.setText("");
-                        textUseBefore.setText("");
-                        textName.requestFocus();
-                        LoadProductNo();
+                        textCustomer.setText("");
+                        textProduct.setText("");
+                        textOrderName.setText("");
+                        textDate.setText("");
+                        textCustomer.requestFocus();
+                        LoadOrderNo();
                         Fetch();
                     }
                     else{
@@ -160,10 +121,10 @@ public class Products extends JFrame{
         EXPORTButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String filename = "C:/Users/Admin/IdeaProjects/FIFO/Exported_products_file.csv";
+                String filename = "C:/Users/Admin/IdeaProjects/FIFO/Exported_orders_file.csv";
                 try {
                     FileWriter fw = new FileWriter(filename);
-                    pst = connection.prepareStatement("SELECT * FROM products_tbl");
+                    pst = connection.prepareStatement("SELECT * FROM orders_tbl");
                     rs = pst.executeQuery();
                     while(rs.next()){
                         fw.append(rs.getString(1));
@@ -204,9 +165,9 @@ public class Products extends JFrame{
         }
     }
 
-    public void LoadProductNo(){
+    public void LoadOrderNo(){
         try {
-            pst = connection.prepareStatement("SELECT id FROM products_tbl");
+            pst = connection.prepareStatement("SELECT order_id FROM orders_tbl");
             rs = pst.executeQuery();
             comboBox1.removeAllItems();
             while(rs.next()){
@@ -219,18 +180,18 @@ public class Products extends JFrame{
 
     private void InitializeTable(){
         DefaultTableModel model = new DefaultTableModel();
-        model.addColumn("id");
-        model.addColumn("product_name");
-        model.addColumn("price");
-        model.addColumn("qty");
-        model.addColumn("usage_date");
+        model.addColumn("order_id");
+        model.addColumn("id_customer");
+        model.addColumn("id_product");
+        model.addColumn("order_date");
+        model.addColumn("order_name");
         table1.setModel(model);
     }
 
     private void Fetch(){
         try {
             int q;
-            pst = connection.prepareStatement("SELECT * FROM products_tbl");
+            pst = connection.prepareStatement("SELECT * FROM orders_tbl");
             rs = pst.executeQuery();
             ResultSetMetaData rss = rs.getMetaData();
             q = rss.getColumnCount();
@@ -238,15 +199,16 @@ public class Products extends JFrame{
             df.setRowCount(0);
             while(rs.next()){
                 Vector v2 = new Vector();
-                    v2.add(rs.getString("id"));
-                    v2.add(rs.getString("product_name"));
-                    v2.add(rs.getString("price"));
-                    v2.add(rs.getString("qty"));
-                    v2.add(rs.getString("usage_date"));
+                v2.add(rs.getString("order_id"));
+                v2.add(rs.getString("id_customer"));
+                v2.add(rs.getString("id_product"));
+                v2.add(rs.getString("order_date"));
+                v2.add(rs.getString("order_name"));
                 df.addRow(v2);
             }
         } catch (SQLException e) {
             Logger.getLogger(Products.class.getName()).log(Level.SEVERE,null,e);
         }
     }
+
 }
