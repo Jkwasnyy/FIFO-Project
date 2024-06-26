@@ -7,10 +7,10 @@ public class ShopWelcome extends JFrame{
     private JPanel panel1;
     private JButton logInButton;
     private JButton exitButton;
-    private int width = 300, height = 200;
+    private int width = 350, height = 200;
 
     public ShopWelcome() {
-        super("Shop Pracz");
+        super("Shop 'Delikatesy Centrum'");
         this.setContentPane(this.panel1);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setSize(width,height);
